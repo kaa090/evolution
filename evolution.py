@@ -98,6 +98,7 @@ class World:
                 self.next_generation()
 
     def next_generation(self):
+        print("#######################################")
         childs = []
         for creature in self.creatures:
             childs.extend(creature.make_childs())
@@ -150,7 +151,7 @@ class Creature:
         elif point_type == POISON_CODE:
             self.CS_IP += 4
 
-    def move(self, point, world: World):
+    def move(self, point, world):
         print('{}:\tmove to {}'.format(self.name, point))
         if world.map[point.y][point.x] == EMPTY_CODE:
             world.map[self.point.y][self.point.x] = EMPTY_CODE
@@ -166,7 +167,7 @@ class Creature:
             world.map[point.y][point.x] = EMPTY_CODE
             self.health = 0
 
-    def eat_or_defuse(self, point, world: World):
+    def eat_or_defuse(self, point, world):
         print('{}:\teat_or_defuse from {}'.format(self.name, point))
         if world.map[point.y][point.x] == FOOD_CODE:
             world.map[point.y][point.x] = EMPTY_CODE
@@ -174,7 +175,7 @@ class Creature:
         elif world.map[point.y][point.x] == POISON_CODE:
             world.map[point.y][point.x] = FOOD_CODE
 
-    def look(self, point, world: World):
+    def look(self, point):
         print('{}:\tlook to {}'.format(self.name, point))
         pass
 
@@ -192,8 +193,8 @@ class Creature:
 
         return childs
 
-    def run(self, world: World):
-        for i in range(10):
+    def run(self, world):
+        for _ in range(10):
             if self.DNA[self.CS_IP] < 4 * DIRECTIONS:
                 point = self.get_point_from_command(self.DNA[self.CS_IP])
 
@@ -204,7 +205,7 @@ class Creature:
                     self.eat_or_defuse(point, world)
                     break
                 elif 2 * DIRECTIONS <= self.DNA[self.CS_IP] < 3 * DIRECTIONS:
-                    self.look(point, world)
+                    self.look(point)
                 elif 3 * DIRECTIONS <= self.DNA[self.CS_IP] < 4 * DIRECTIONS:
                     self.turn(self.DNA[self.CS_IP] % DIRECTIONS)
 
@@ -217,9 +218,9 @@ class Creature:
         self.health -= COST_OF_TURN
 
 
-world = World()
-world.populate_creatures(world.creatures)
-print(world)
-world.run_creatures()
+myWorld = World()
+myWorld.populate_creatures(myWorld.creatures)
+print(myWorld)
+myWorld.run_creatures()
 print("end")
-print(world)
+print(myWorld)
