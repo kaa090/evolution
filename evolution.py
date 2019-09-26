@@ -6,8 +6,9 @@ DIRECTIONS = 8
 
 WORLD_X = 10
 WORLD_Y = 10
-CREATURES = 3
+CREATURES = 1
 SURVIVORS = 2
+CHILDS = 0
 FOODS = 10
 POISONS = 10
 
@@ -15,13 +16,13 @@ POISONS = 10
 # WORLD_Y = 20
 # CREATURES = 64
 # SURVIVORS = 8
+# CHILDS = 8
 # FOODS = 60
 # POISONS = 60
 
 EMPTIES = WORLD_X * WORLD_Y - CREATURES - FOODS - POISONS
 
 EPOCH = 100
-CHILDS = 8
 MUTATION = 2
 
 HEALTH = 100
@@ -117,10 +118,11 @@ class Creature:
         else:
             self.DNA = np.random.randint(0, DNA_SIZE, DNA_SIZE)
         self.CS_IP = 0
+        self.history = ""
 
     def __str__(self):
-        return '{}:\tage = {}, health = {}, coords = {}, eye = {}, CS_IP = {}, DNA = {}' \
-            .format(self.name, self.age, self.health, self.point, self.eye, self.CS_IP, self.DNA)
+        return '{}:\tage = {}, health = {}, coords = {}, eye = {}, CS_IP = {}' \
+            .format(self.name, self.age, self.health, self.point, self.eye, self.CS_IP)
 
     def get_point_from_command(self, command):
         direction = command % DIRECTIONS
@@ -152,7 +154,8 @@ class Creature:
             self.CS_IP += 4
 
     def move(self, point, world):
-        print('{}:\tmove to {}'.format(self.name, point))
+        self.history += '\tmove to {}'.format(point)
+
         if world.map[point.y][point.x] == EMPTY_CODE:
             world.map[self.point.y][self.point.x] = EMPTY_CODE
             world.map[point.y][point.x] = CREATURE_CODE
@@ -168,7 +171,8 @@ class Creature:
             self.health = 0
 
     def eat_or_defuse(self, point, world):
-        print('{}:\teat_or_defuse from {}'.format(self.name, point))
+        self.history += '\teat_or_defuse from {}'.format(point)
+
         if world.map[point.y][point.x] == FOOD_CODE:
             world.map[point.y][point.x] = EMPTY_CODE
             self.health += FOOD_HEALTH
@@ -176,11 +180,11 @@ class Creature:
             world.map[point.y][point.x] = FOOD_CODE
 
     def look(self, point):
-        print('{}:\tlook to {}'.format(self.name, point))
-        pass
+        self.history += '\tlook to {}'.format(point)
 
     def turn(self, direction):
-        print('{}:\tturn by {}'.format(self.name, direction))
+        self.history += '\tturn by {}'.format(direction)
+
         self.eye += direction
         self.eye %= DIRECTIONS
 
@@ -197,19 +201,19 @@ class Creature:
         for _ in range(10):
             if self.DNA[self.CS_IP] < 4 * DIRECTIONS:
                 point = self.get_point_from_command(self.DNA[self.CS_IP])
+                command = self.DNA[self.CS_IP]
+                self.increment_cs_ip(world.map[point.y][point.x])
 
-                if self.DNA[self.CS_IP] < DIRECTIONS:
+                if command < DIRECTIONS:
                     self.move(point, world)
                     break
-                elif DIRECTIONS <= self.DNA[self.CS_IP] < 2 * DIRECTIONS:
+                elif DIRECTIONS <= command < 2 * DIRECTIONS:
                     self.eat_or_defuse(point, world)
                     break
-                elif 2 * DIRECTIONS <= self.DNA[self.CS_IP] < 3 * DIRECTIONS:
+                elif 2 * DIRECTIONS <= command < 3 * DIRECTIONS:
                     self.look(point)
-                elif 3 * DIRECTIONS <= self.DNA[self.CS_IP] < 4 * DIRECTIONS:
-                    self.turn(self.DNA[self.CS_IP] % DIRECTIONS)
-
-                self.increment_cs_ip(world.map[point.y][point.x])
+                elif 3 * DIRECTIONS <= command < 4 * DIRECTIONS:
+                    self.turn(command % DIRECTIONS)
             else:
                 self.CS_IP += self.DNA[self.CS_IP]
                 self.CS_IP %= DNA_SIZE
