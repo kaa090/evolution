@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-# test2
+
 NORD, NORDOST, OST, SUDOST, SUD, SUDWEST, WEST, NORDWEST = 0, 1, 2, 3, 4, 5, 6, 7
 DIRECTIONS = 8
 
